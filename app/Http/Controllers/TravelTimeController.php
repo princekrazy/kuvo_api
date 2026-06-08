@@ -30,7 +30,7 @@ class TravelTimeController extends Controller
             'destination.lng' => 'required|numeric',
         ]);
 
-        $apiKey = "AIzaSyB4Rh266gQDzI9eLAuW476g6vMGfED1g9U";
+        $apiKey = env('GOOGLE_API_KEY');
 
         $response = Http::withoutVerifying()->withHeaders([
             'X-Goog-Api-Key' => $apiKey,
