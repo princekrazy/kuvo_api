@@ -1,28 +1,40 @@
 FROM php:8.3-cli
 
-# Install system dependencies
+# System packages
 RUN apt-get update && apt-get install -y \
-    git unzip zip curl libpq-dev libzip-dev
+    git unzip zip curl libpq-dev libzip-dev libpng-dev libxml2-dev
 
-# Install PHP extensions
-RUN docker-php-ext-install pdo pdo_pgsql zip
+# PHP extensions REQUIRED for Laravel 12 + Reverb + APIs
+RUN docker-php-ext-install \
+    pdo \
+    pdo_pgsql \
+    mbstring \
+    xml \
+    ctype \
+    fileinfo \
+    zip \
+    sockets
 
-# Install Composer
+# Enable curl (already built but ensure dependency exists)
+RUN apt-get install -y libcurl4-openssl-dev
+
+# Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 
-# Copy project files
 COPY . .
 
-# Install dependencies
-RUN composer install --no-dev --optimize-autoloader
+# Install dependencies safely
+RUN composer install \
+    --no-dev \
+    --optimize-autoloader \
+    --no-interaction \
+    --prefer-dist
 
-# Make start script executable
+# Fix permissions
 RUN chmod +x start.sh
 
-# Expose port (Render uses dynamic PORT)
 EXPOSE 10000
 
-# Start app
 CMD ["./start.sh"]
