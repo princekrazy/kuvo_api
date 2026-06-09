@@ -22,7 +22,7 @@ WORKDIR /app
 COPY . .
 
 # Install dependencies
-RUN composer install \
+RUN composer install -vvv \
     --no-dev \
     --optimize-autoloader \
     --no-interaction \
