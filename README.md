@@ -1,59 +1,213 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Uber Clone Backend API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Overview
 
-## About Laravel
+This project is the backend service for a real-time ride-hailing platform inspired by Uber. It is built with Laravel and provides authentication, ride management, driver tracking, payment processing, and real-time communication between riders and drivers.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+The system focuses on delivering a responsive ride-booking experience by combining REST APIs, real-time location updates, and payment processing through PayPal.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Key Features
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Real-Time Driver Tracking
 
-## Learning Laravel
+One of the core challenges of ride-hailing applications is keeping driver locations synchronized across multiple clients.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+This project implements real-time driver tracking using WebSockets through Laravel Reverb. Driver devices continuously transmit GPS coordinates to the backend, allowing rider applications to receive live location updates without requiring page refreshes.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Benefits:
 
-## Laravel Sponsors
+* Live driver movement on rider maps
+* Reduced polling overhead
+* Improved user experience
+* Near real-time ride monitoring
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Ride Lifecycle Management
 
-### Premium Partners
+The backend manages the entire ride workflow:
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+1. Rider creates ride request
+2. Available drivers receive request
+3. Driver reviews route and ride details
+4. Driver accepts ride
+5. Rider receives driver information
+6. Driver location updates in real time
+7. Driver completes ride
+8. Ride status finalized
+9. Driver commission deducted
 
-## Contributing
+### Authentication System
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Separate authentication flows are implemented for:
 
-## Code of Conduct
+* Riders
+* Drivers
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Features include:
 
-## Security Vulnerabilities
+* Registration
+* Login
+* Protected endpoints
+* Driver profile management
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### PayPal Payment Integration
 
-## License
+The platform integrates PayPal for secure payment processing.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Workflow:
+
+1. Create PayPal order
+2. Redirect user through payment process
+3. Capture payment upon approval
+4. Confirm successful transaction
+5. Continue ride workflow
+
+### Driver Wallet & Commission Logic
+
+Each driver account maintains an internal wallet balance.
+
+Business rules:
+
+* Drivers start with a balance of 20
+* Commission is deducted after ride completion
+* Drivers with balances below zero cannot accept additional rides
+* Drivers receive clear feedback when account balance prevents ride acceptance
+
+This simulates the commission-based model used by many ride-hailing platforms.
+
+---
+
+## Tech Stack
+
+* Laravel
+* Laravel Reverb
+* WebSockets
+* PayPal REST APIs
+* MySQL
+* RESTful API Architecture
+
+---
+
+## Available API Endpoints
+
+### Authentication
+
+| Method | Endpoint        |
+| ------ | --------------- |
+| POST   | /driverregister |
+| POST   | /driverlogin    |
+| POST   | /userregister   |
+| POST   | /userlogin      |
+
+### Ride Management
+
+| Method | Endpoint         |
+| ------ | ---------------- |
+| POST   | /createride      |
+| GET    | /getriderequests |
+| POST   | /driveraccept    |
+| POST   | /drivercomplete  |
+
+### Driver Management
+
+| Method | Endpoint              |
+| ------ | --------------------- |
+| GET    | /getdriverdetails     |
+| POST   | /updatedriverinfo     |
+| POST   | /updatedriverlocation |
+
+### Rider Management
+
+| Method | Endpoint         |
+| ------ | ---------------- |
+| GET    | /getriderdetails |
+
+### Payments
+
+| Method | Endpoint            |
+| ------ | ------------------- |
+| POST   | /createpaypalorder  |
+| POST   | /capturepaypalorder |
+
+---
+
+## Running the Project
+
+### Install Dependencies
+
+```bash
+composer install
+```
+
+### Configure Environment
+
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+Update database and PayPal credentials in `.env`.
+
+### Run Migrations
+
+```bash
+php artisan migrate
+```
+
+### Start Development Server
+
+```bash
+concurrently "php artisan serve" "php artisan reverb:start"
+```
+
+This starts:
+
+* Laravel HTTP API server
+* Laravel Reverb WebSocket server
+
+---
+
+## Architecture Highlights
+
+### Real-Time Communication Layer
+
+Driver GPS coordinates are continuously pushed to the backend through WebSocket connections.
+
+Instead of repeatedly polling the server for location updates, rider clients subscribe to live updates, resulting in:
+
+* Lower latency
+* Reduced server load
+* Better scalability
+* Smoother map interactions
+
+### State Management
+
+The backend maintains ride status transitions to ensure:
+
+* Drivers cannot accept multiple rides simultaneously
+* Riders cannot create duplicate active ride requests
+* Ride completion is handled consistently
+
+---
+
+## Future Improvements
+
+* Driver availability zones
+* Surge pricing
+* Ride history analytics
+* Push notifications
+* Driver ratings and reviews
+* Multi-payment provider support
+* Background location optimization
+
+---
+
+## What This Project Demonstrates
+
+* REST API development with Laravel
+* Real-time systems using WebSockets
+* Payment gateway integration
+* Geolocation services
+* Ride dispatch workflows
+* Authentication and authorization
+* Business rule implementation
+* Full-stack system design
